@@ -6,7 +6,9 @@ from api.parsers.functions.noun_forms import parse_inflection_of
 from api.parsers.functions.noun_forms import parse_noun_form_lv_inflection_of
 from api.parsers.functions.noun_forms import parse_one_parameter_template
 from api.parsers.functions.verb_forms import parse_verb_form_inflection_of
-from api.parsers.functions.verb_forms import parse_es_verb_form_of
+from api.parsers.functions.verb_forms import parse_es_verb_form_of, parse_ca_verb_form_of
+from api.parsers.functions.verb_forms import parse_fi_verb_form_of
+from api.parsers.functions.verb_forms import parse_fi_form_of
 from api.parsers.functions.adjective_forms import parse_adjective_form
 
 from api.parsers.inflection_template import NounForm, VerbForm, AdjectiveForm
@@ -55,6 +57,16 @@ class TestInflectionTemplatesParser(TestCase):
         self.assertEqual(output.number, 's')
         self.assertEqual(output.lemma, 'comparatif')
 
+    def test_parse_ca_verb_form_of(self):
+        template_expression = '{{ca-verb form of|p=2|n=sg|t=impf|m=ind|abordar}}'
+        output = parse_ca_verb_form_of(template_expression)
+        self.assertIsInstance(output, VerbForm)
+        self.assertEqual(output.number, 'sg')
+        self.assertEqual(output.lemma, 'abordar')
+        self.assertEqual(output.tense, 'impf')
+        self.assertEqual(output.mood, 'ind')
+        self.assertEqual(output.person, '2')
+
     def test_parse_es_verb_form_of(self):
         template_expression = '{{es-verb form of|person=third-person|number=plural|tense=imperfect|mood=subjunctive|sera=ra|ending=ar|terminar}}'
         output = parse_es_verb_form_of(template_expression)
@@ -86,6 +98,24 @@ class TestInflectionTemplatesParser(TestCase):
         self.assertEqual(output.number, 'p')
         self.assertEqual(output.case, 'dat')
         self.assertEqual(output.lemma, 'bagātīgs')
+
+    def test_parse_fi_verb_form_of(self):
+        template_expression = '{{fi-verb form of|pn=pass|tm=impr|absorboitua}}'
+        output = parse_fi_verb_form_of(template_expression)
+        self.assertIsInstance(output, VerbForm)
+        self.assertEqual(output.number, 's')
+        self.assertEqual(output.tense, 'pres')
+        self.assertEqual(output.lemma, 'absorboitua')
+
+    def test_parse_fi_form_of(self):
+        template_expression = '{{fi-form of|aateloida|pr=third-person|pl=singular|mood=indicative|tense=present}}'
+        output = parse_fi_form_of(template_expression)
+        self.assertIsInstance(output, VerbForm)
+        self.assertEqual(output.person, 'third-person')
+        self.assertEqual(output.number, 'singular')
+        self.assertEqual(output.tense, 'present')
+        self.assertEqual(output.mood, 'indicative')
+        self.assertEqual(output.lemma, 'aateloida')
 
 
 class TestInflectionTemplateClasses(TestCase):

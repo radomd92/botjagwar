@@ -94,6 +94,10 @@ class ParserError(Exception):
     pass
 
 
+class ParserNotFoundError(ParserError):
+    pass
+
+
 class EnWiktionaryInflectionTemplateParser(object):
     def __init__(self):
         self.process_function = {}
@@ -113,16 +117,19 @@ class EnWiktionaryInflectionTemplateParser(object):
             form_of_definition = form_of_definition.replace(c, '')
         parts = form_of_definition.split('|')
         if (expected_class, parts[0]) in list(self.process_function.keys()):
-            ret = self.process_function[(expected_class, parts[0])](form_of_definition)
-            if not isinstance(ret, expected_class):
-                raise AttributeError("Wrong object returned. Expected %s, got %s" % (
-                    expected_class.__name__,
-                    ret.__class__.__name__,
-                ))
+            try:
+                ret = self.process_function[(expected_class, parts[0])](form_of_definition)
+                if not isinstance(ret, expected_class):
+                    raise ParserError("Wrong object returned. Expected %s, got %s" % (
+                        expected_class.__name__,
+                        ret.__class__.__name__,
+                    ))
+                return ret
+            except ValueError as exc:
+                print('ERROR: ', exc)
         else:
-            raise AttributeError('No parser defined for "%s": %s' % (parts[0], orig_template_expression))
+            raise ParserNotFoundError('No parser defined for "%s": %s' % (parts[0], orig_template_expression))
 
-        return ret
 
     def get_lemma(self, expected_class, template_expression):
         return self.get_elements(expected_class, template_expression).lemma

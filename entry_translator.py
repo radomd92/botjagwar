@@ -1,21 +1,18 @@
 #!/usr/bin/python3.6
+import json
 import os
 import sys
 import time
-import json
-import pywikibot as pwbot
 import traceback
 
+import pywikibot as pwbot
+from aiohttp import web
+from aiohttp.web import Response
+from pywikibot import Site, Page
 
 from api import entryprocessor
 from api.decorator import threaded
 from api.translation.core import Translation
-
-from pywikibot import Site, Page
-
-from aiohttp import web
-from aiohttp.web import Response
-
 
 # GLOBAL VARS
 verbose = False
@@ -34,18 +31,6 @@ def set_throttle(i):
     t.setDelays(i)
 
 
-def _update_unknowns(unknowns):
-    try:
-        f = open(userdata_file + "word_hits", 'a')
-    except FileNotFoundError:
-        os.system('mkdir -p %s' % userdata_file)
-        f = open(userdata_file + "word_hits", 'a')
-    for word, lang in unknowns:
-        word += ' [%s]\n' % lang
-        f.write(word)
-    f.close()
-
-
 def _get_page(name, lang):
     page = pwbot.Page(pwbot.Site(lang, 'wiktionary'), name)
     return page
@@ -54,9 +39,9 @@ def _get_page(name, lang):
 @threaded
 def _update_statistics(rc_bot):
     if not rc_bot.stats["edits"] % 5:
-        cttime = time.gmtime()
+        cttime = time.gmtime()[:6]
         rc_bot.chronometer = time.time() - rc_bot.chronometer
-        print(("%d/%02d/%02d %02d:%02d:%02d > " % cttime[:6], \
+        print(("%d/%02d/%02d %02d:%02d:%02d > " % cttime, \
                "Fanovana: %(edits)d; pejy voaforona: %(newentries)d; hadisoana: %(errors)d" % rc_bot.stats \
                + " taha: fanovana %.1f/min" % (60. * (5 / rc_bot.chronometer))))
         rc_bot.chronometer = time.time()
@@ -77,7 +62,7 @@ async def handle_wiktionary_page(request):
     """
     Handle a Wiktionary page, attempts to translate the wiktionary page's content and
     uploads it to the Malagasy Wiktionary.
-    :param lang: Wiktionary edition to look up on.
+    <lang>: Wiktionary edition to look up on.
     :return: 200 if everything worked with the list of database lookups including translations,
     500 if an error occurred
     """
@@ -89,9 +74,9 @@ async def handle_wiktionary_page(request):
         return
     data = {}
     try:
-        data['unknowns'], data['new_entries'] = await translations.process_wiktionary_wiki_page(page)
-        _update_unknowns(data['unknowns'])
+        await translations.process_wiktionary_wiki_page(page)
     except Exception as e:
+        traceback.print_exc()
         data['traceback'] = traceback.format_exc()
         data['message'] = '' if not hasattr(e, 'message') else getattr(e, 'message')
         response = Response(text=json.dumps(data), status=500, content_type='application/json')
@@ -113,20 +98,20 @@ async def get_wiktionary_processed_page(request):
     wiktionary_processor.process(page)
 
     for entry in wiktionary_processor.getall():
-        word, pos, language_code, translation = entry
+        word, pos, language_code, definition = entry.to_tuple()
         translation_list = []
         section = dict(
             word=word,
             language=language_code,
             part_of_speech=pos,
-            translation=translation)
+            translation=definition[0])
+
         for translation in wiktionary_processor.retrieve_translations():
-            translation_word, translation_pos, translation_language, translation = translation
             translation_section = dict(
-                word=translation_word,
-                language=translation_language,
-                part_of_speech=translation_pos,
-                translation=translation)
+                word=translation.entry,
+                language=translation.language,
+                part_of_speech=translation.part_of_speech,
+                translation=translation.entry_definition[0])
             translation_list.append(translation_section)
 
         if language_code == language:

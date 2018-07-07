@@ -1,13 +1,13 @@
-import os
-from time import sleep
-from subprocess import Popen
-from subprocess import PIPE
-
 import json
+import os
+from subprocess import PIPE
+from subprocess import Popen
+from time import sleep
+from unittest import TestCase
+
 import requests
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from unittest import TestCase
 
 from api.decorator import threaded, retry_on_fail
 from database.dictionary import Base, Definition, Word
@@ -178,13 +178,13 @@ class TestDictionaryRestService(TestCase):
         word_id = data[0]['id']
         resp = requests.put(
             URL_HEAD + '/entry/%d/edit' % word_id,
-            json=json.dumps({
+            json={
                 'definitions': [{
                     'definition': 'tarameguni',
                     'definition_language': 'mg'
                 }],
                 'part_of_speech': 'aojs',
-            })
+            }
         )
         self.assertEquals(resp.status_code, 200)
 

@@ -19,7 +19,14 @@ endef
 
 prepare:
 	sudo apt-get update
-	sudo apt-get install -y libssl-dev wget unzip python3-pip libsqlite3-dev libxml2-dev libxslt1-dev
+	sudo apt-get install -y \
+	    libssl-dev \
+	    wget unzip \
+	    python3-pip \
+	    python3-pip \
+	    libsqlite3-dev \
+	    libxml2-dev \
+	    libxslt1-dev
 	LC_ALL="en_US.UTF-8" sudo $(PIP) install -r requirements.txt
 
 define test_setup
@@ -52,7 +59,7 @@ unit_tests: prepare_tests
 
 test: prepare_tests
 	$(call test_setup)
-	$(PYTHON) -m "nose" -v $(TEST_DIR)
+	PYWIKIBOT2_NO_USER_CONFIG=1 $(PYTHON) -m "nose" -v $(TEST_DIR)
 	$(call test_teardown)
 
 .PHONY: test
@@ -65,7 +72,7 @@ complexity:
 
 install:
 	$(call create_dirs)
-	git describe --abbrev=0 --tags > data/version
+	git describe --tags > data/version
 	cp -r api $(OPT_DIR)
 	cp -r conf $(OPT_DIR)
 	cp -rn data $(OPT_DIR)

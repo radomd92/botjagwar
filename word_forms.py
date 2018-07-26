@@ -89,7 +89,7 @@ def save_count():
         f.write(str(last_entry))
 
 
-def get_malagasy_page_list():
+def _get_malagasy_page_list():
     with open('user_data/mgwiktionary-latest-all-titles-in-ns0', 'r') as f:
         for line in f.readlines():
             PAGE_SET.add(line.strip())
@@ -194,7 +194,7 @@ def parse_word_forms():
 
 if __name__ == '__main__':
     try:
-        get_malagasy_page_list()
+        #get_malagasy_page_list()
         parse_word_forms()
     finally:
         save_count()

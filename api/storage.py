@@ -44,12 +44,17 @@ class EntryPageFileWriter(Writer):
 
 @singleton
 class EntryPageFileReader(Reader):
+    page_dump_file = None
     def __init__(self, language):
-        self.page_dump_file = open('user_data/dump-%s.pkl' % language, 'rb')
+        try:
+            self.page_dump_file = open('user_data/dump-%s.pkl' % language, 'rb')
+        except FileNotFoundError:
+            pass
         self.page_dump = {}
 
     def read(self):
-        self.page_dump = pickle.load(self.page_dump_file)
+        if self.page_dump_file is not None:
+            self.page_dump = pickle.load(self.page_dump_file)
 
 
 @singleton
@@ -132,6 +137,9 @@ class SiteExtractorCacheEngine(object):
 
     def add(self, word, content):
         self.page_dump[word] = content
+
+    def list(self):
+        return [x for x in self.page_dump.keys()]
 
     def write(self):
         page_dump_file = open('user_data/site-extractor-%s.pkl' % self.sitename, 'wb')

@@ -12,6 +12,7 @@ from api.dictionary import \
     configuration
 from api.dictionary import \
     get_dictionary, \
+    get_dictionary_xml, \
     get_language_list, \
     download_dictionary, \
     get_inferred_multilingual_dictionary
@@ -45,12 +46,14 @@ app.router.add_route('GET', '/languages/list', get_language_list)
 app.router.add_route('GET', '/languages/list/download', download_dictionary)
 
 app.router.add_route('GET', '/definition/{definition_id}', definition.get_definition)
-#app.router.add_route('PUT', '/definition/{language}', definition.edit_definition)
+app.router.add_route('GET', '/definition_words/{definition_id}', definition.get_definition_with_words)
+app.router.add_route('PUT', '/definition/{definition_id}/edit', definition.edit_definition)
 #app.router.add_route('POST', '/definition/{language}/create', definition.create_definition)
 app.router.add_route('DELETE', '/definition/{definition_id}/delete', definition.delete_definition)
 app.router.add_route('POST', '/definition/search', definition.search_definition)
 
-app.router.add_route('GET', '/dictionary/{language}', get_dictionary)
+app.router.add_route('GET', '/dictionary/{language}', get_dictionary_xml)
+app.router.add_route('GET', '/xml_dictionary/{language}', get_dictionary)
 app.router.add_route('GET', '/dictionary/{source}/{bridge}/{target}', get_inferred_multilingual_dictionary)
 
 app.router.add_route('GET', '/entry/{language}/{word}', entry.get_entry)

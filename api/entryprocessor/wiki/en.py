@@ -171,3 +171,13 @@ class ENWiktionaryProcessor(WiktionaryProcessor):
 
         # print("Nahitana dikanteny ", len(items))
         return items
+
+
+class WiktExtractAdapter():
+    def __init__(self):
+        try:
+            import wiktextract
+        except ImportError:
+            raise NotImplementedError('wiktextract is required.')
+        else:
+            wiktextract.parse_wiktionary()

@@ -3,11 +3,12 @@ from api.parsers.constants import GENDER, CASES, NUMBER, MOOD, TENSE, PERSONS, V
 
 
 class NonLemma(object):
-    def __init__(self, lemma=None, case=None, number=None, gender=None):
+    def __init__(self, lemma=None, case=None, number=None, gender=None, formal=False):
         self.gender = gender
         self.case = case
         self.lemma = lemma
         self.number = number
+        self.formal = formal
 
     def to_malagasy_definition(self):
         raise NotImplementedError()
@@ -19,12 +20,14 @@ class VerbForm(NonLemma):
     person = None
     number = None
 
-    def __init__(self, lemma=None, tense=None, mood=None, person=None, number=None, voice='act'):
-        super(VerbForm, self).__init__(lemma=lemma, number=number, case=None, gender=None)
+    def __init__(self, lemma=None, tense=None, mood=None,
+                 person=None, number=None, voice='act', formal=False):
+        super(VerbForm, self).__init__(lemma=lemma, number=number, case=None, formal=formal)
         self.voice = voice
         self.tense = tense
         self.mood = mood
         self.person = person
+        self.formal = formal
 
     def to_malagasy_definition(self):
         """
@@ -35,6 +38,8 @@ class VerbForm(NonLemma):
             explanation += PERSONS[self.person] + ' '
         if self.number in NUMBER:
             explanation += NUMBER[self.number] + ' '
+        if self.formal:
+            explanation += "miaraka amin'ny mari-panajana "
 
         explanation += 'ny ' if len(explanation.strip()) != 0 else ''
         if self.mood in MOOD:
@@ -61,8 +66,9 @@ class NounForm(NonLemma):
     lemma = None
     definite = None
 
-    def __init__(self, lemma=None, case=None, number=None, gender=None, definite=None, possessive=None):
-        super(NounForm, self).__init__(lemma=lemma, case=case, number=number, gender=gender)
+    def __init__(self, lemma=None, case=None, number=None,
+                 gender=None, definite=None, possessive=None, formal=False):
+        super(NounForm, self).__init__(lemma=lemma, case=case, number=number, gender=gender, formal=formal)
         self.definite = definite
         self.possessive = possessive
 
@@ -73,6 +79,8 @@ class NounForm(NonLemma):
         explanation = ''
         if self.possessive in POSSESSIVENESS:
             explanation += POSSESSIVENESS[self.possessive] + ' '
+        if self.formal:
+            explanation += "miaraka amin'ny mari-panajana "
         if self.case in CASES:
             explanation += CASES[self.case] + ' '
         if self.gender in GENDER:

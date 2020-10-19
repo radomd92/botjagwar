@@ -126,33 +126,33 @@ def parse_es_verb_form_of(template_expression):
 
     for part in parts:
         count += 1
-        if part.startswith('pers=') or part.startswith('person='):
-            person = part.split('=')[1]
-        elif part.startswith('number='):
-            number = part.split('=')[1]
-        elif part.startswith('tense='):
-            tense = part.split('=')[1]
-        elif part.startswith('mood='):
-            mood = part.split('=')[1]
-        elif part.startswith('ending='):
-            pass
-        elif part.startswith('sera='):
-            pass
-        elif part.startswith('formal='):
-            pass
-        elif part.startswith('sense='):
-            pass
-        elif part.startswith('voseo='):
-            pass
-        elif part.startswith('participle='):
-            pass
-        elif part.startswith('region='):
-            pass
-        elif part.startswith('gender='):
-            pass
-        elif '=' not in part:
+        if '=' in part:
+            if part.startswith('pers=') or part.startswith('person='):
+                person = part.split('=')[1]
+            elif part.startswith('number='):
+                number = part.split('=')[1]
+            elif part.startswith('tense='):
+                tense = part.split('=')[1]
+            elif part.startswith('mood='):
+                mood = part.split('=')[1]
+            elif part.startswith('ending='):
+                pass
+            elif part.startswith('sera='):
+                pass
+            elif part.startswith('formal='):
+                pass
+            elif part.startswith('sense='):
+                pass
+            elif part.startswith('voseo='):
+                pass
+            elif part.startswith('participle='):
+                pass
+            elif part.startswith('region='):
+                pass
+            elif part.startswith('gender='):
+                pass
+        else:
             lemma = part.replace('}', '')
-
 
     verb_form = VerbForm(lemma, tense, mood, person, number)
     return verb_form
@@ -249,20 +249,25 @@ def parse_fi_form_of(template_expression):
 
     parts = template_expression.split('|')
     number = person = mood = tense = None
+    lemma = None
     for tparam in parts:
-        if tparam.startswith('pr='):
-            person = tparam[3:]
-        if tparam.startswith('pl='):
-            number = tparam[3:]
-        if tparam.startswith('mood='):
-            mood = tparam[5:]
-        if tparam.startswith('tense='):
-            tense = tparam[6:]
+        if '=' in tparam:
+            if tparam.startswith('pr='):
+                person = tparam[3:]
+            if tparam.startswith('pl='):
+                number = tparam[3:]
+            if tparam.startswith('mood='):
+                mood = tparam[5:]
+            if tparam.startswith('tense='):
+                tense = tparam[6:]
+        else:
+            lemma = tparam.replace('}', '')
 
-    if '=' in parts[1]:
-        lemma = parts[-1]
-    else:
-        lemma = parts[1]
+    if lemma is None:
+        if '=' in parts[1]:
+            lemma = parts[-1]
+        else:
+            lemma = parts[1]
 
     verb_form = VerbForm(lemma, tense, mood, person, number)
     return verb_form
